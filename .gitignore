@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Electron build output
+electron/dist/
+
+# Android build output
+android/.gradle/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.idea/
+
+# OS
+.DS_Store
+Thumbs.db

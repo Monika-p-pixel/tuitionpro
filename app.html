@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>TuitionPro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f6f7f9;--bg3:#eef0f3;
+  --text:#0f1117;--text2:#4a5568;--text3:#9aa3b0;
+  --border:#e2e6ed;--border2:#c8cdd8;
+  --blue:#185FA5;--blue-l:#E6F1FB;--blue-d:#0C447C;
+  --green:#2d7d1a;--green-l:#e8f5e2;--green-d:#1a5210;
+  --red:#c0392b;--red-l:#fdecea;--red-d:#922b21;
+  --amber:#b45309;--amber-l:#fef3cd;--amber-d:#7c3d00;
+  --purple:#5b4fcf;--purple-l:#eeecfc;--purple-d:#3d348b;
+  --r:8px;--rl:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#161b22;--bg2:#0d1117;--bg3:#21262d;
+  --text:#e6edf3;--text2:#8b949e;--text3:#484f58;
+  --border:#30363d;--border2:#484f58;
+  --blue:#58a6ff;--blue-l:#0d2235;--blue-d:#79c0ff;
+  --green:#3fb950;--green-l:#0f2d0f;--green-d:#56d364;
+  --red:#f85149;--red-l:#2c0b0b;--red-d:#ff7b72;
+  --amber:#e3b341;--amber-l:#2d1f00;--amber-d:#f0c843;
+  --purple:#a371f7;--purple-l:#1e1535;--purple-d:#bc8cff;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg2);color:var(--text);font-size:14px}
+.topbar{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.brand{display:flex;align-items:center;gap:10px}
+.icon-box{width:36px;height:36px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.app-name{font-size:15px;font-weight:700;color:var(--text)}
+.app-tagline{font-size:11px;color:var(--text3)}
+.tabs{background:var(--bg);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit;transition:color .15s}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.tab:hover{color:var(--text)}
+.wrap{padding:16px;max-width:1100px;margin:0 auto}
+.pg{display:none}.pg.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.kpi-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.kpi-v{font-size:22px;font-weight:700;color:var(--text)}
+.kpi-s{font-size:11px;color:var(--text3);margin-top:2px}
+.row-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-t{font-size:15px;font-weight:700}
+.btn{padding:8px 14px;font-size:13px;font-weight:500;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;transition:background .1s,transform .08s}
+.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.97)}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}.btn-p:hover{background:var(--blue-d)}
+.btn-s{padding:5px 11px;font-size:12px}
+.btn-d{background:var(--red);color:#fff;border-color:var(--red)}.btn-d:hover{background:var(--red-d)}
+.btn-g{background:var(--green);color:#fff;border-color:var(--green)}.btn-g:hover{background:var(--green-d)}
+.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filters input,.filters select{padding:7px 10px;font-size:13px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text)}
+.filters input{flex:1;min-width:150px}
+.tbl-wrap{background:var(--bg);border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:580px;font-size:13px}
+thead{background:var(--bg2)}
+th{padding:9px 12px;text-align:left;font-weight:600;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+td{padding:9px 12px;border-top:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:hover td{background:var(--bg2)}
+.chip{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.c-act{background:var(--green-l);color:var(--green-d)}
+.c-dis{background:var(--red-l);color:var(--red-d)}
+.c-paid{background:var(--green-l);color:var(--green-d)}
+.c-over{background:var(--red-l);color:var(--red-d)}
+.c-pend{background:var(--amber-l);color:var(--amber-d)}
+.c-cbse{background:var(--blue-l);color:var(--blue-d)}
+.c-state{background:var(--purple-l);color:var(--purple-d)}
+.av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.nc{display:flex;align-items:center;gap:8px}
+.ov-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px;z-index:200}
+.ov-wrap.on{display:flex}
+.modal{background:var(--bg);border-radius:var(--rl);border:1px solid var(--border);width:100%;max-width:440px;max-height:92vh;overflow-y:auto}
+.m-hd{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.m-t{font-size:15px;font-weight:700}
+.m-bd{padding:18px}
+.m-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;padding:9px 10px;font-size:13px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text)}
+.fi:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,95,165,.15)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.xbtn{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);padding:2px 6px;border-radius:4px;line-height:1}
+.xbtn:hover{background:var(--bg2)}
+.empty{text-align:center;padding:50px 20px;color:var(--text3);font-size:13px}
+.alert{border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.a-w{background:var(--amber-l);color:var(--amber-d)}
+.a-i{background:var(--blue-l);color:var(--blue-d)}
+.a-ok{background:var(--green-l);color:var(--green-d)}
+.acts{display:flex;gap:5px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="icon-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="8" height="8" rx="1.5" fill="#B5D4F4"/>
+        <rect x="13" y="3" width="8" height="8" rx="1.5" fill="#85B7EB"/>
+        <rect x="3" y="13" width="8" height="8" rx="1.5" fill="#85B7EB"/>
+        <rect x="13" y="13" width="8" height="8" rx="1.5" fill="#E6F1FB"/>
+        <path d="M16 16.5L17.5 18L20.5 15" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="app-name">TuitionPro</div>
+      <div class="app-tagline">Classes 1–12 · CBSE &amp; State</div>
+    </div>
+  </div>
+  <button class="btn btn-p" onclick="openAdd()">+ Add student</button>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="go('dash')">Dashboard</button>
+  <button class="tab" onclick="go('students')">Students</button>
+  <button class="tab" onclick="go('fees')">Fee tracker</button>
+  <button class="tab" onclick="go('overdue')">Overdue</button>
+</div>
+
+<div class="wrap">
+
+  <!-- DASHBOARD -->
+  <div class="pg on" id="pg-dash">
+    <div class="kpis" id="kpis"></div>
+    <div id="d-alerts"></div>
+    <div class="row-hd"><span class="sec-t">Students overview</span></div>
+    <div id="d-list"></div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="pg" id="pg-students">
+    <div class="filters">
+      <input id="q" placeholder="Search name…" oninput="renderStudents()">
+      <select id="fstd" onchange="renderStudents()"><option value="">All classes</option></select>
+      <select id="fsyl" onchange="renderStudents()"><option value="">All syllabi</option><option>CBSE</option><option>State</option></select>
+      <select id="facc" onchange="renderStudents()"><option value="">All access</option><option value="active">Active</option><option value="disabled">Disabled</option></select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:22%">Student</th><th style="width:9%">Class</th><th style="width:10%">Syllabus</th>
+          <th style="width:10%">Fee</th><th style="width:13%">Due date</th>
+          <th style="width:11%">Fee status</th><th style="width:10%">Access</th><th style="width:15%">Actions</th>
+        </tr></thead>
+        <tbody id="s-body"></tbody>
+      </table>
+      <div class="empty" id="s-empty">No students yet. Click "+ Add student" to begin.</div>
+    </div>
+  </div>
+
+  <!-- FEES -->
+  <div class="pg" id="pg-fees">
+    <div class="row-hd">
+      <span class="sec-t">Fee collection — <span id="mo-label"></span></span>
+      <button class="btn btn-s" onclick="allPaid()">Mark all paid</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:22%">Student</th><th style="width:9%">Class</th><th style="width:11%">Syllabus</th>
+          <th style="width:12%">Amount</th><th style="width:14%">Due date</th>
+          <th style="width:12%">Status</th><th style="width:20%">Actions</th>
+        </tr></thead>
+        <tbody id="f-body"></tbody>
+      </table>
+      <div class="empty" id="f-empty">No students enrolled yet.</div>
+    </div>
+  </div>
+
+  <!-- OVERDUE -->
+  <div class="pg" id="pg-overdue">
+    <div class="alert a-w" id="ov-banner"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:24%">Student</th><th style="width:9%">Class</th><th style="width:11%">Syllabus</th>
+          <th style="width:12%">Amount</th><th style="width:15%">Due date</th>
+          <th style="width:12%">Access</th><th style="width:17%">Action</th>
+        </tr></thead>
+        <tbody id="ov-body"></tbody>
+      </table>
+      <div class="empty" id="ov-empty">No overdue fees — all good!</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="ov-wrap" id="s-modal">
+  <div class="modal">
+    <div class="m-hd"><span class="m-t" id="s-modal-t">Add student</span><button class="xbtn" onclick="close('s-modal')">&times;</button></div>
+    <div class="m-bd">
+      <div class="f2">
+        <div class="fg"><label class="fl">First name</label><input class="fi" id="fn" placeholder="Arjun"></div>
+        <div class="fg"><label class="fl">Last name</label><input class="fi" id="ln" placeholder="Kumar"></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Standard</label><select class="fi" id="fstd2"></select></div>
+        <div class="fg"><label class="fl">Syllabus</label><select class="fi" id="fsyl2"><option>CBSE</option><option>State</option></select></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Monthly fee (₹)</label><input class="fi" id="ffee" type="number" value="1000"></div>
+        <div class="fg"><label class="fl">Due day</label><select class="fi" id="fdd"><option value="5">5th</option><option value="10" selected>10th</option><option value="15">15th</option><option value="20">20th</option><option value="25">25th</option></select></div>
+      </div>
+      <div class="fg"><label class="fl">Parent / guardian</label><input class="fi" id="fp2" placeholder="Ramesh Kumar"></div>
+      <div class="fg"><label class="fl">Phone number</label><input class="fi" id="fph" type="tel" placeholder="9876543210"></div>
+      <input type="hidden" id="fid">
+    </div>
+    <div class="m-ft"><button class="btn" onclick="close('s-modal')">Cancel</button><button class="btn btn-p" onclick="save()">Save student</button></div>
+  </div>
+</div>
+
+<!-- FEE MODAL -->
+<div class="ov-wrap" id="fe-modal">
+  <div class="modal">
+    <div class="m-hd"><span class="m-t" id="fe-t">Record payment</span><button class="xbtn" onclick="close('fe-modal')">&times;</button></div>
+    <div class="m-bd">
+      <div id="fe-info" style="margin-bottom:14px;font-size:13px;color:var(--text3)"></div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Amount (₹)</label><input class="fi" id="fa" type="number"></div>
+        <div class="fg"><label class="fl">Date</label><input class="fi" id="fd" type="date"></div>
+      </div>
+      <div class="fg"><label class="fl">Method</label><select class="fi" id="fm"><option>Cash</option><option>UPI</option><option>Bank transfer</option><option>Cheque</option></select></div>
+      <div class="fg"><label class="fl">Notes</label><input class="fi" id="fnotes" placeholder="Reference, remarks…"></div>
+      <input type="hidden" id="fsid">
+    </div>
+    <div class="m-ft"><button class="btn" onclick="close('fe-modal')">Cancel</button><button class="btn btn-g" onclick="recPay()">Record payment</button></div>
+  </div>
+</div>
+
+<script>
+const AC=['#0C447C','#27500A','#3d348b','#7c3d00','#922b21','#185FA5','#0F6E56'];
+const AB=['#E6F1FB','#e8f5e2','#eeecfc','#fef3cd','#fdecea','#B5D4F4','#E1F5EE'];
+
+let SS=JSON.parse(localStorage.getItem('tp2')||'[]');
+let NID=+localStorage.getItem('tp2id')||1;
+let TAB='dash',EID=null;
+
+const sv=()=>{localStorage.setItem('tp2',JSON.stringify(SS));localStorage.setItem('tp2id',''+NID)};
+const today=()=>new Date().toISOString().split('T')[0];
+function nxtDue(day){const d=new Date(),nd=new Date(d.getFullYear(),d.getMonth(),+day);if(nd<d)return new Date(d.getFullYear(),d.getMonth()+1,+day).toISOString().split('T')[0];return nd.toISOString().split('T')[0]}
+const isOv=s=>s.feeStatus!=='paid'&&new Date(s.feeDueDate)<new Date();
+function avClr(n){let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%AC.length;return[AC[h],AB[h]]}
+const ini=(f,l)=>((f||'')[0]||'').toUpperCase()+((l||'')[0]||'').toUpperCase();
+const chkAcc=()=>SS.forEach(s=>{if(isOv(s))s.access='disabled';else if(s.feeStatus==='paid')s.access='active'});
+
+function initSelects(){
+  const a=document.getElementById('fstd2'),b=document.getElementById('fstd');
+  for(let i=1;i<=12;i++){
+    const o=`<option value="${i}">Class ${i}</option>`;
+    a.insertAdjacentHTML('beforeend',o);b.insertAdjacentHTML('beforeend',o);
+  }
+}
+
+function go(t){
+  TAB=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['dash','students','fees','overdue'][i]===t));
+  document.querySelectorAll('.pg').forEach(el=>el.classList.remove('on'));
+  document.getElementById('pg-'+t).classList.add('on');
+  if(t==='dash')rDash();
+  if(t==='students')rStudents();
+  if(t==='fees')rFees();
+  if(t==='overdue')rOver();
+}
+
+function rDash(){
+  chkAcc();
+  const tot=SS.length,act=SS.filter(s=>s.access==='active').length,
+    paid=SS.filter(s=>s.feeStatus==='paid').length,
+    ov=SS.filter(s=>isOv(s)).length,
+    totF=SS.reduce((a,s)=>a+s.fee,0),
+    col=SS.filter(s=>s.feeStatus==='paid').reduce((a,s)=>a+s.fee,0);
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-l">Students</div><div class="kpi-v">${tot}</div><div class="kpi-s">${act} active</div></div>
+    <div class="kpi"><div class="kpi-l">Collected</div><div class="kpi-v">₹${col.toLocaleString()}</div><div class="kpi-s">this month</div></div>
+    <div class="kpi"><div class="kpi-l">Pending</div><div class="kpi-v">₹${(totF-col).toLocaleString()}</div><div class="kpi-s">${tot-paid} students</div></div>
+    <div class="kpi"><div class="kpi-l">Overdue</div><div class="kpi-v" style="color:${ov>0?'var(--red)':'inherit'}">${ov}</div><div class="kpi-s">auto-disabled</div></div>`;
+  let al='';
+  if(ov>0)al+=`<div class="alert a-w">⚠ ${ov} student(s) overdue — access disabled automatically.</div>`;
+  const up=SS.filter(s=>{if(s.feeStatus==='paid')return false;const d=(new Date(s.feeDueDate)-new Date())/86400000;return d>=0&&d<=3});
+  if(up.length)al+=`<div class="alert a-i">ℹ ${up.length} student(s) have fees due within 3 days.</div>`;
+  document.getElementById('d-alerts').innerHTML=al;
+  if(!SS.length){document.getElementById('d-list').innerHTML='<div class="empty">No students yet. Click "+ Add student" to get started.</div>';return}
+  let h=`<div class="tbl-wrap"><table><thead><tr><th style="width:30%">Student</th><th style="width:12%">Class</th><th style="width:13%">Syllabus</th><th style="width:13%">Fee</th><th style="width:14%">Status</th><th style="width:18%">Access</th></tr></thead><tbody>`;
+  SS.slice(-6).reverse().forEach(s=>{
+    const[tc,bc]=avClr(s.firstName+s.lastName),o=isOv(s);
+    h+=`<tr><td><div class="nc"><div class="av" style="background:${bc};color:${tc}">${ini(s.firstName,s.lastName)}</div><div><div style="font-weight:700">${s.firstName} ${s.lastName}</div><div style="font-size:11px;color:var(--text3)">${s.phone||''}</div></div></div></td><td>Class ${s.std}</td><td><span class="chip c-${s.syllabus.toLowerCase()}">${s.syllabus}</span></td><td>₹${s.fee}</td><td><span class="chip ${o?'c-over':s.feeStatus==='paid'?'c-paid':'c-pend'}">${o?'overdue':s.feeStatus}</span></td><td><span class="chip ${s.access==='active'?'c-act':'c-dis'}">${s.access}</span></td></tr>`;
+  });
+  document.getElementById('d-list').innerHTML=h+'</tbody></table></div>';
+}
+
+function rStudents(){
+  chkAcc();
+  const q=(document.getElementById('q').value||'').toLowerCase(),
+    fs=document.getElementById('fstd').value,fy=document.getElementById('fsyl').value,fa=document.getElementById('facc').value;
+  const fl=SS.filter(s=>{
+    if(q&&!(s.firstName+' '+s.lastName).toLowerCase().includes(q))return false;
+    if(fs&&''+s.std!==fs)return false;
+    if(fy&&s.syllabus!==fy)return false;
+    if(fa&&s.access!==fa)return false;
+    return true;
+  });
+  const tb=document.getElementById('s-body'),em=document.getElementById('s-empty');
+  if(!fl.length){tb.innerHTML='';em.style.display='block';return}
+  em.style.display='none';
+  tb.innerHTML=fl.map(s=>{
+    const[tc,bc]=avClr(s.firstName+s.lastName),o=isOv(s);
+    return`<tr><td><div class="nc"><div class="av" style="background:${bc};color:${tc}">${ini(s.firstName,s.lastName)}</div><div><div style="font-weight:700">${s.firstName} ${s.lastName}</div><div style="font-size:11px;color:var(--text3)">${s.parent||''}</div></div></div></td><td>Class ${s.std}</td><td><span class="chip c-${s.syllabus.toLowerCase()}">${s.syllabus}</span></td><td>₹${s.fee}</td><td style="font-size:12px">${s.feeDueDate}</td><td><span class="chip ${o?'c-over':s.feeStatus==='paid'?'c-paid':'c-pend'}">${o?'overdue':s.feeStatus}</span></td><td><span class="chip ${s.access==='active'?'c-act':'c-dis'}">${s.access}</span></td><td><div class="acts"><button class="btn btn-s" onclick="openEdit(${s.id})">Edit</button><button class="btn btn-s btn-d" onclick="del(${s.id})">Del</button></div></td></tr>`;
+  }).join('');
+}
+
+function rFees(){
+  chkAcc();
+  document.getElementById('mo-label').textContent=new Date().toLocaleString('default',{month:'long',year:'numeric'});
+  const tb=document.getElementById('f-body'),em=document.getElementById('f-empty');
+  if(!SS.length){tb.innerHTML='';em.style.display='block';return}
+  em.style.display='none';
+  tb.innerHTML=SS.map(s=>{
+    const[tc,bc]=avClr(s.firstName+s.lastName),o=isOv(s);
+    return`<tr><td><div class="nc"><div class="av" style="background:${bc};color:${tc};width:26px;height:26px;font-size:10px">${ini(s.firstName,s.lastName)}</div><span style="font-weight:700">${s.firstName} ${s.lastName}</span></div></td><td>Class ${s.std}</td><td><span class="chip c-${s.syllabus.toLowerCase()}">${s.syllabus}</span></td><td>₹${s.fee}</td><td style="font-size:12px">${s.feeDueDate}</td><td><span class="chip ${o?'c-over':s.feeStatus==='paid'?'c-paid':'c-pend'}">${o?'overdue':s.feeStatus}</span></td><td><div class="acts">${s.feeStatus!=='paid'?`<button class="btn btn-s btn-g" onclick="openFee(${s.id})">Collect</button>`:'<span class="chip c-paid">Paid ✓</span>'} ${s.feeStatus==='paid'?`<button class="btn btn-s" onclick="undo(${s.id})">Undo</button>`:''}</div></td></tr>`;
+  }).join('');
+}
+
+function rOver(){
+  chkAcc();
+  const ov=SS.filter(s=>isOv(s));
+  document.getElementById('ov-banner').textContent=ov.length?`⚠ ${ov.length} student(s) overdue — access disabled until payment.`:'✓ No overdue fees. All good!';
+  document.getElementById('ov-banner').className='alert '+(ov.length?'a-w':'a-ok');
+  const tb=document.getElementById('ov-body'),em=document.getElementById('ov-empty');
+  if(!ov.length){tb.innerHTML='';em.style.display='block';return}
+  em.style.display='none';
+  tb.innerHTML=ov.map(s=>{
+    const[tc,bc]=avClr(s.firstName+s.lastName),days=Math.floor((new Date()-new Date(s.feeDueDate))/86400000);
+    return`<tr><td><div class="nc"><div class="av" style="background:${bc};color:${tc}">${ini(s.firstName,s.lastName)}</div><div><div style="font-weight:700">${s.firstName} ${s.lastName}</div><div style="font-size:11px;color:var(--red)">${days}d overdue · ${s.phone||''}</div></div></div></td><td>Class ${s.std}</td><td><span class="chip c-${s.syllabus.toLowerCase()}">${s.syllabus}</span></td><td>₹${s.fee}</td><td style="font-size:12px">${s.feeDueDate}</td><td><span class="chip c-dis">disabled</span></td><td><button class="btn btn-s btn-g" onclick="openFee(${s.id})">Collect fee</button></td></tr>`;
+  }).join('');
+}
+
+function openAdd(){
+  EID=null;document.getElementById('s-modal-t').textContent='Add student';
+  ['fn','ln','fp2','fph'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('fstd2').value='1';document.getElementById('fsyl2').value='CBSE';
+  document.getElementById('ffee').value='1000';document.getElementById('fdd').value='10';
+  document.getElementById('s-modal').classList.add('on');
+}
+function openEdit(id){
+  const s=SS.find(x=>x.id===id);if(!s)return;EID=id;
+  document.getElementById('s-modal-t').textContent='Edit student';
+  document.getElementById('fn').value=s.firstName;document.getElementById('ln').value=s.lastName;
+  document.getElementById('fstd2').value=s.std;document.getElementById('fsyl2').value=s.syllabus;
+  document.getElementById('ffee').value=s.fee;document.getElementById('fdd').value=s.feeDueDay;
+  document.getElementById('fp2').value=s.parent||'';document.getElementById('fph').value=s.phone||'';
+  document.getElementById('s-modal').classList.add('on');
+}
+function save(){
+  const fn=document.getElementById('fn').value.trim();if(!fn){alert('Enter first name.');return}
+  const ln=document.getElementById('ln').value.trim(),std=+document.getElementById('fstd2').value,
+    syl=document.getElementById('fsyl2').value,fee=+document.getElementById('ffee').value||1000,
+    dd=+document.getElementById('fdd').value||10,
+    parent=document.getElementById('fp2').value.trim(),phone=document.getElementById('fph').value.trim();
+  if(EID!==null){const s=SS.find(x=>x.id===EID);if(s)Object.assign(s,{firstName:fn,lastName:ln,std,syllabus:syl,fee,feeDueDay:dd,feeDueDate:nxtDue(dd),parent,phone});}
+  else SS.push({id:NID++,firstName:fn,lastName:ln,std,syllabus:syl,fee,feeDueDay:dd,feeDueDate:nxtDue(dd),feeStatus:'pending',access:'active',parent,phone,paymentHistory:[]});
+  chkAcc();sv();close('s-modal');refresh();
+}
+function del(id){if(!confirm('Remove this student?'))return;SS=SS.filter(s=>s.id!==id);sv();refresh()}
+function openFee(id){
+  const s=SS.find(x=>x.id===id);if(!s)return;
+  document.getElementById('fsid').value=id;
+  document.getElementById('fe-t').textContent=`Collect fee — ${s.firstName} ${s.lastName}`;
+  document.getElementById('fe-info').textContent=`Class ${s.std} · ${s.syllabus} · Due: ${s.feeDueDate}`;
+  document.getElementById('fa').value=s.fee;document.getElementById('fd').value=today();
+  document.getElementById('fm').value='Cash';document.getElementById('fnotes').value='';
+  document.getElementById('fe-modal').classList.add('on');
+}
+function recPay(){
+  const id=+document.getElementById('fsid').value,amt=+document.getElementById('fa').value||0,
+    dt=document.getElementById('fd').value||today(),meth=document.getElementById('fm').value,
+    notes=document.getElementById('fnotes').value;
+  const s=SS.find(x=>x.id===id);if(!s)return;
+  s.feeStatus='paid';s.access='active';
+  if(!s.paymentHistory)s.paymentHistory=[];
+  s.paymentHistory.push({amount:amt,date:dt,method:meth,notes});
+  const nd=new Date(dt);nd.setMonth(nd.getMonth()+1);
+  s.feeDueDate=new Date(nd.getFullYear(),nd.getMonth(),s.feeDueDay).toISOString().split('T')[0];
+  sv();close('fe-modal');refresh();
+}
+function undo(id){
+  const s=SS.find(x=>x.id===id);if(!s)return;s.feeStatus='pending';
+  if(s.paymentHistory&&s.paymentHistory.length)s.paymentHistory.pop();
+  chkAcc();sv();refresh();
+}
+function allPaid(){
+  if(!confirm('Mark all students as paid?'))return;
+  SS.forEach(s=>{s.feeStatus='paid';s.access='active';const nd=new Date();nd.setMonth(nd.getMonth()+1);s.feeDueDate=new Date(nd.getFullYear(),nd.getMonth(),s.feeDueDay).toISOString().split('T')[0];});
+  sv();refresh();
+}
+function close(id){document.getElementById(id).classList.remove('on')}
+function refresh(){if(TAB==='dash')rDash();else if(TAB==='students')rStudents();else if(TAB==='fees')rFees();else if(TAB==='overdue')rOver()}
+initSelects();rDash();
+</script>
+</body>
+</html>
