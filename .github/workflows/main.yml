@@ -1,0 +1,112 @@
+name: Build TuitionPro
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: electron
+
+      - name: Build EXE
+        run: npm run build:win
+        working-directory: electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: TuitionPro-Windows-EXE
+          path: electron/dist/*.exe
+          retention-days: 30
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Gradle 8.4
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt/gradle
+          echo "/opt/gradle/gradle-8.4/bin" >> $GITHUB_PATH
+
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon
+        working-directory: android
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TuitionPro-Android-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+  release:
+    name: Create Release
+    needs: [build-windows, build-android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download EXE
+        uses: actions/download-artifact@v4
+        with:
+          name: TuitionPro-Windows-EXE
+          path: ./release
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: TuitionPro-Android-APK
+          path: ./release
+
+      - name: Rename files
+        run: |
+          cd release
+          for f in *.exe; do mv "$f" "TuitionPro-Setup-Windows.exe" 2>/dev/null || true; done
+          mv app-debug.apk TuitionPro.apk 2>/dev/null || true
+          ls -lh
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: TuitionPro v1.0.${{ github.run_number }}
+          body: |
+            ## TuitionPro - Download and Install
+
+            | Platform | File | How to install |
+            |----------|------|----------------|
+            | Android  | TuitionPro.apk | Download, tap to install. Allow unknown apps in Settings first. |
+            | Windows  | TuitionPro-Setup-Windows.exe | Download, double-click, install. |
+          files: |
+            release/TuitionPro.apk
+            release/TuitionPro-Setup-Windows.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
