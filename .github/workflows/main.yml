@@ -1,4 +1,4 @@
-name: Build TuitionPro
+name: Build TuitionPro (APK + EXE)
 
 on:
   push:
@@ -16,14 +16,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: electron/package-lock.json
 
       - name: Install dependencies
         run: npm install
-        working-directory: electron
+        working-directory: ./electron
 
-      - name: Build EXE
+      - name: Build Windows EXE
         run: npm run build:win
-        working-directory: electron
+        working-directory: ./electron
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -45,28 +47,46 @@ jobs:
           java-version: 17
           distribution: temurin
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v3
 
-      - name: Install Gradle 8.4
+      - name: Download Gradle wrapper jar
         run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /opt/gradle
-          echo "/opt/gradle/gradle-8.4/bin" >> $GITHUB_PATH
+          mkdir -p android/gradle/wrapper
+          curl -fsSL \
+            "https://services.gradle.org/distributions/gradle-8.4-bin.zip" \
+            -o /tmp/gradle.zip
+          unzip -p /tmp/gradle.zip "*/lib/gradle-wrapper.jar" > \
+            android/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || \
+          wget -q \
+            "https://raw.githubusercontent.com/nicowillis/gradle-wrapper/main/gradle-wrapper.jar" \
+            -O android/gradle/wrapper/gradle-wrapper.jar || true
 
-      - name: Build APK
-        run: gradle assembleDebug --no-daemon
-        working-directory: android
+      - name: Setup Gradle wrapper via Gradle action
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.4"
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+        working-directory: ./android
+
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/debug/app-debug.apk \
+             android/app/build/outputs/apk/debug/TuitionPro.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: TuitionPro-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/TuitionPro.apk
           retention-days: 30
 
   release:
-    name: Create Release
+    name: Publish Release
     needs: [build-windows, build-android]
     runs-on: ubuntu-latest
     permissions:
@@ -84,25 +104,31 @@ jobs:
           name: TuitionPro-Android-APK
           path: ./release
 
-      - name: Rename files
+      - name: Rename EXE nicely
         run: |
           cd release
           for f in *.exe; do mv "$f" "TuitionPro-Setup-Windows.exe" 2>/dev/null || true; done
-          mv app-debug.apk TuitionPro.apk 2>/dev/null || true
           ls -lh
 
-      - name: Publish Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: TuitionPro v1.0.${{ github.run_number }}
+          name: "TuitionPro v1.0.${{ github.run_number }}"
           body: |
-            ## TuitionPro - Download and Install
+            ## TuitionPro — Download & Install
 
-            | Platform | File | How to install |
-            |----------|------|----------------|
-            | Android  | TuitionPro.apk | Download, tap to install. Allow unknown apps in Settings first. |
-            | Windows  | TuitionPro-Setup-Windows.exe | Download, double-click, install. |
+            | Platform | File | Instructions |
+            |----------|------|-------------|
+            | **Android** | `TuitionPro.apk` | Download → tap to install. Enable *Install unknown apps* in Settings first. |
+            | **Windows** | `TuitionPro-Setup-Windows.exe` | Download → double-click → Install. |
+
+            ### Features
+            - Manage students Classes 1–12 (CBSE & State syllabus)
+            - ₹1,000/month default fee per student
+            - Access auto-disabled when fee is overdue
+            - Works fully offline — data saved on your device
+            - Dark mode support
           files: |
             release/TuitionPro.apk
             release/TuitionPro-Setup-Windows.exe
